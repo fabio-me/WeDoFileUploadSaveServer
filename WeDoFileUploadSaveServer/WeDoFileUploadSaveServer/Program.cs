@@ -1,7 +1,17 @@
+using WeDoFileUploadSaveServer.Repositories.Contexts;
+using WeDoFileUploadSaveServer.Services;
+using WeDoFileUploadSaveServer.Services.Interfaces;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+//
+builder.Services.AddScoped<DbContextMariaDB>();
+
+//
+builder.Services.AddScoped<IFileDbService, FileDbService>();
 
 var app = builder.Build();
 
@@ -22,6 +32,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Home}/{action=FileSave}/{id?}");
 
 app.Run();
