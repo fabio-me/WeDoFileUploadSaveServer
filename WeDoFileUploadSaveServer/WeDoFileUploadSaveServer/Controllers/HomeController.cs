@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Diagnostics;
 using WeDoFileUploadSaveServer.DTOs;
 using WeDoFileUploadSaveServer.Models;
@@ -26,18 +27,23 @@ namespace WeDoFileUploadSaveServer.Controllers
         public IActionResult FileSave()
         {
 
-            return View();
+            //return View();
+            return PartialView();
         }
 
         // tests
         [HttpPost("upload")]
-        public async Task<IActionResult> Upload(IFormFile file)
+        public async Task<IActionResult> Upload(IFormFile file, string key, string group, string key_server)
         {
             if (file == null || file.Length == 0)
                 return BadRequest("Arquivo inválido");
 
-            string key = "f9093a0557c7a280e278916a27f04f37";
-            string group = "test";
+            // HTTP ERROR 401
+            if (key_server != "key_7194f9c8-61c2-4ba6-8c47-aec4cd70ed53")
+                return Unauthorized();
+
+            //string key = "f9093a0557c7a280e278916a27f04f37";
+            //string group = "test";
             FileDbSaveConfirmeDTO fileDbSaveConfirme = await _fileDbService.Create(file, key, group);
 
             return Json(fileDbSaveConfirme);
