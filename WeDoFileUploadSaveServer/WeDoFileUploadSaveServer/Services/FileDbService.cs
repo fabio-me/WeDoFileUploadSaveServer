@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Xml.Linq;
 using System.Drawing;
 using System.Security.Policy;
+using Microsoft.EntityFrameworkCore;
 
 namespace WeDoFileUploadSaveServer.Services
 {
@@ -47,7 +48,7 @@ namespace WeDoFileUploadSaveServer.Services
             return numberInMB * 1024 * 1024;
         }
 
-        public async Task<FileDbSaveConfirmeDTO> Create(IFormFile file, string key, string group)
+        public async Task<FileDbSaveConfirmeDTO> Create(IFormFile file, string projectName, string group)
         {
             if (file == null || file.Length == 0)
                 return new FileDbSaveConfirmeDTO().Fail("INVALID_FILE");
@@ -55,8 +56,8 @@ namespace WeDoFileUploadSaveServer.Services
             if (file.Length > GetSizeLimit())
                 return new FileDbSaveConfirmeDTO().Fail("FILE_LARGER_THAN_ALLOWED");
 
-            if (string.IsNullOrEmpty(key))
-                return new FileDbSaveConfirmeDTO().Fail("INVALID_KEY");
+            if (string.IsNullOrEmpty(projectName))
+                return new FileDbSaveConfirmeDTO().Fail("INVALID_PROJECT_NAME");
 
             if (string.IsNullOrEmpty(group))
                 return new FileDbSaveConfirmeDTO().Fail("INVALID_GROUP");
@@ -66,11 +67,11 @@ namespace WeDoFileUploadSaveServer.Services
 
             FileDb fileDb = new FileDb
             {
-                Key = key,
+                ProjectName = projectName,
                 Group = group,
                 Name = GetNameRadom(),
                 Size = file.Length,
-                Extension = Path.GetExtension(file.FileName),
+                ContentType = file.ContentType,
                 Data = memoryStream.ToArray()
             };
 
@@ -83,6 +84,24 @@ namespace WeDoFileUploadSaveServer.Services
                 return new FileDbSaveConfirmeDTO().Ok(pathName);
             }
             return new FileDbSaveConfirmeDTO();
+        }
+
+        public async Task<FileDbView> View(string fileName)
+        {
+            if (string.IsNullOrWhiteSpace(fileName))
+                return new FileDbView().Fail("INVALID_FILE_NAME");
+
+            FileDb? fileDb = await _context.FileDb
+                .FirstOrDefaultAsync(f => f.Name == fileName && f.IsDeleted == false);
+
+            if (fileDb == null)
+                return new FileDbView().Fail("NOT_FOUND");
+
+            if (fileDb.ContentType == null ||
+                fileDb.Data == null)
+                return new FileDbView().Fail("FILE_ERROR");
+
+            return new FileDbView().Ok(fileDb.ContentType, fileDb.Data);
         }
     }
 }

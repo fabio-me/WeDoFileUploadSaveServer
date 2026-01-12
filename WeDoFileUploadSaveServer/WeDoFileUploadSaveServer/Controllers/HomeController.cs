@@ -33,7 +33,7 @@ namespace WeDoFileUploadSaveServer.Controllers
 
         // tests
         [HttpPost("upload")]
-        public async Task<IActionResult> Upload(IFormFile file, string key, string group, string key_server)
+        public async Task<IActionResult> test_Upload(IFormFile file, string key, string group, string key_server)
         {
             if (file == null || file.Length == 0)
                 return BadRequest("Arquivo inválido");
@@ -50,51 +50,12 @@ namespace WeDoFileUploadSaveServer.Controllers
         }
 
 
-        // downloads
-        // https://localhost:7216/Home/GetFile?nome=guid
-        [HttpGet]
-        public async Task<IActionResult> GetFile([FromQuery] string nome)
-        {
-            if (string.IsNullOrWhiteSpace(nome))
-                return BadRequest("Nome do arquivo é obrigatório");
-
-            var arquivo = await _context.Arquivo
-                .FirstOrDefaultAsync(a => a.NomeOriginal == nome);
-
-            if (arquivo == null)
-                return NotFound("Arquivo não encontrado");
-
-            return File(
-                arquivo.Conteudo,
-                arquivo.ContentType,
-                arquivo.NomeOriginal
-            );
-        }
-
-
-        //Visualizar
-        // https://localhost:7216/Home/VisualizarFile?nome=guid
-        [HttpGet]
-        public async Task<IActionResult> VisualizarFile([FromQuery] string nome)
-        {
-            if (string.IsNullOrWhiteSpace(nome))
-                return BadRequest("Nome do arquivo é obrigatório");
-
-            var arquivo = await _context.Arquivo
-                .FirstOrDefaultAsync(a => a.NomeOriginal == nome);
-
-            if (arquivo == null)
-                return NotFound("Arquivo não encontrado");
-
-            Response.Headers.Add("Content-Disposition", "inline");
-            return File(arquivo.Conteudo, arquivo.ContentType);
-        }
         //
 
 
         public IActionResult Index()
         {
-            return View();
+            return PartialView();
         }
 
         public IActionResult Privacy()

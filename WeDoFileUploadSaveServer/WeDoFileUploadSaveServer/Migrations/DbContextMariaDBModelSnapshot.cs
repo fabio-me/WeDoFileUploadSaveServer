@@ -21,34 +21,6 @@ namespace WeDoFileUploadSaveServer.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
-            modelBuilder.Entity("WeDoFileUploadSaveServer.Repositories.Models.Arquivo", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ContentType")
-                        .HasColumnType("longtext");
-
-                    b.Property<byte[]>("Conteudo")
-                        .HasColumnType("longblob");
-
-                    b.Property<string>("Extensao")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("NomeOriginal")
-                        .HasColumnType("longtext");
-
-                    b.Property<long>("Tamanho")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Arquivo");
-                });
-
             modelBuilder.Entity("WeDoFileUploadSaveServer.Repositories.Models.FileDb", b =>
                 {
                     b.Property<long>("Id")
@@ -57,11 +29,11 @@ namespace WeDoFileUploadSaveServer.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
+                    b.Property<string>("ContentType")
+                        .HasColumnType("longtext");
+
                     b.Property<byte[]>("Data")
                         .HasColumnType("longblob");
-
-                    b.Property<string>("Extension")
-                        .HasColumnType("longtext");
 
                     b.Property<string>("Group")
                         .HasColumnType("longtext");
@@ -69,10 +41,10 @@ namespace WeDoFileUploadSaveServer.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<string>("Key")
+                    b.Property<string>("Name")
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("ProjectName")
                         .HasColumnType("longtext");
 
                     b.Property<long>("Size")

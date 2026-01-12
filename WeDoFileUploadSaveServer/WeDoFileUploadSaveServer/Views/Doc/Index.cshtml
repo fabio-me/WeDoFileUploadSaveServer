@@ -1,0 +1,593 @@
+﻿<!--
+ <form method="post" enctype="multipart/form-data" action="./upload">
+    <label>key</label>
+    <input type="text" name="key" value="f9093a0557c7a280e278916a27f04f37" />
+    <br />
+    <label>group</label>
+    <input type="text" name="group" value="test" />
+    <br />
+    <input type="file" name="file" />
+    <button type="submit">Enviar</button>
+</form>
+-->
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload API</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Highlight.js para syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .api-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .api-header {
+            background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .form-section {
+            padding: 2rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s;
+        }
+
+            .form-control:focus {
+                border-color: #0d6efd;
+                box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+            }
+
+        .btn-upload {
+            background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+            .btn-upload:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(13, 110, 253, 0.4);
+            }
+
+        .code-section {
+            background: #1e1e1e;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 2rem;
+        }
+
+        .code-header {
+            background: #2d2d2d;
+            color: #ccc;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #404040;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .code-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .btn-copy {
+            background: #404040;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+            .btn-copy:hover {
+                background: #505050;
+            }
+
+            .btn-copy.copied {
+                background: #28a745;
+            }
+
+        pre {
+            margin: 0;
+            padding: 1.5rem;
+            overflow-x: auto;
+        }
+
+        .hljs {
+            background: #1e1e1e;
+            padding: 0;
+        }
+
+        .file-input-area {
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s;
+            background: #fafafa;
+            cursor: pointer;
+        }
+
+            .file-input-area:hover {
+                border-color: #0d6efd;
+                background: #f0f7ff;
+            }
+
+        .file-preview {
+            background: #e9ecef;
+            border-radius: 6px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .endpoint-badge {
+            background: #198754;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="api-card">
+            <!-- Header -->
+            <div class="api-header">
+                <h3 class="mb-1">
+                    <i class="bi bi-cloud-upload me-2"></i>API Upload de Arquivos
+                </h3>
+                <p class="mb-0 opacity-75">Envie arquivos através de requisição POST multipart/form-data</p>
+            </div>
+
+            <!-- Form Section -->
+            <div class="form-section">
+                <div class="endpoint-badge">POST /upload</div>
+
+                <form method="post" enctype="multipart/form-data" action="../File/Upload" id="uploadForm">
+                    <!-- Key Field -->
+                    <div class="row mb-4">
+
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                <i class="bi bi-key me-1"></i>API Key Server
+                            </label>
+                            <input type="text"
+                                   name="key_server"
+                                   class="form-control"
+                                   value="key_7194f9c8-61c2-4ba6-8c47-aec4cd70ed53"
+                                   placeholder="Sua chave de API"
+                                   required>
+                            <div class="form-text">
+                                Chave de autenticação para acesso à API
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                <i class="bi bi-key me-1"></i>Nome do projeto  ProjectName
+                            </label>
+                            <input type="text"
+                                   name="project_name"
+                                   class="form-control"
+                                   value="QA_WeDoFile"
+                                   placeholder="Sua chave de API"
+                                   required>
+                            <div class="form-text">
+                                Chave de acesso para seu arquivo
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                <i class="bi bi-folder me-1"></i>Group
+                            </label>
+                            <input type="text"
+                                   name="group"
+                                   class="form-control"
+                                   value="development"
+                                   placeholder="Nome do grupo">
+                            <div class="form-text">
+                                Categoria para organização dos arquivos
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- File Upload -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <label class="form-label">
+                                <i class="bi bi-file-earmark-arrow-up me-1"></i>Arquivo
+                            </label>
+
+                            <div class="file-input-area" id="dropArea" onclick="document.getElementById('fileInput').click()">
+                                <div class="mb-3">
+                                    <i class="bi bi-cloud-arrow-up display-4 text-secondary"></i>
+                                </div>
+                                <h5>Clique para selecionar um arquivo</h5>
+                                <p class="text-muted mb-3">ou arraste e solte aqui</p>
+
+                                <input type="file"
+                                       name="file"
+                                       id="fileInput"
+                                       class="d-none"
+                                       onchange="updateFilePreview()"
+                                       required>
+
+                                <div class="mt-3">
+                                    <small class="text-muted">
+                                        Tamanho máximo: 10MB
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- File Preview -->
+                            <div id="filePreview" class="d-none">
+                                <div class="file-preview">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-file-earmark-text fs-4 me-3"></i>
+                                        <div class="flex-grow-1">
+                                            <strong id="fileName">Nome do arquivo</strong>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <small id="fileSize">Tamanho do arquivo</small>
+                                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearFile()">
+                                                    <i class="bi bi-trash"></i> Remover
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-upload">
+                            <i class="bi bi-send me-2"></i>Enviar Arquivo
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Code Example Section -->
+                <div class="code-section">
+                    <div class="code-header">
+                        <div class="code-title">
+                            <i class="bi bi-code-slash me-2"></i>Exemplo de Implementação em C#
+                        </div>
+                        <button class="btn-copy" onclick="copyCode()">
+                            <i class="bi bi-clipboard me-1"></i>Copiar Código
+                        </button>
+                    </div>
+
+                    <pre><code class="language-csharp" id="codeExample">using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Web;
+using System.Web.Mvc;
+
+public class UploadClientController : Controller
+{
+    [HttpPost]
+    public async Task<ActionResult> Enviar(HttpPostedFileBase file)
+    {
+        if (file == null || file.ContentLength == 0)
+        {
+            TempData["Erro"] = "Arquivo inválido";
+            return RedirectToAction("Index");
+        }
+
+        using (var client = new HttpClient())
+        {
+            // URL da API que contém o método Upload
+            var url = "https://localhost:5001/upload";
+
+            using (var form = new MultipartFormDataContent())
+            {
+                // Arquivo
+                var streamContent = new StreamContent(file.InputStream);
+                streamContent.Headers.ContentType =
+                    new MediaTypeHeaderValue(file.ContentType);
+
+                form.Add(streamContent, "file", file.FileName);
+
+                // Parâmetros esperados pela API
+                form.Add(new StringContent("f9093a0557c7a280e278916a27f04f37"), "key");
+                form.Add(new StringContent("test"), "group");
+                form.Add(new StringContent("key_7194f9c8-61c2-4ba6-8c47-aec4cd70ed53"), "key_server");
+
+                var response = await client.PostAsync(url, form);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    TempData["Erro"] = "Erro ao enviar arquivo: " + response.StatusCode;
+                    return RedirectToAction("Index");
+                }
+
+                var result = await response.Content.ReadAsStringAsync();
+                TempData["Sucesso"] = "Arquivo enviado com sucesso";
+
+                return RedirectToAction("Index");
+            }
+        }
+    }
+
+    [HttpGet]
+    public ActionResult Index()
+    {
+        return View();
+    }
+}
+</code></pre>
+                </div>
+
+                <!-- Additional C# Examples -->
+                <div class="code-section mt-3">
+                    <div class="code-header">
+                        <div class="code-title">
+                            <i class="bi bi-code-slash me-2"></i>Controller ASP.NET Core
+                        </div>
+                        <button class="btn-copy" onclick="copyControllerCode()">
+                            <i class="bi bi-clipboard me-1"></i>Copiar Código
+                        </button>
+                    </div>
+
+                    <pre><code class="language-csharp" id="controllerCode">using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
+
+[ApiController]
+[Route("api/[controller]")]
+public class UploadController : ControllerBase
+{
+    [HttpPost]
+    [DisableRequestSizeLimit] // Remove limite de tamanho
+    public async Task&lt;IActionResult&gt; UploadFile(
+        [FromForm] string key,
+        [FromForm] string group,
+        [FromForm] IFormFile file)
+    {
+        try
+        {
+            // Validar chave da API
+            if (!IsValidApiKey(key))
+                return Unauthorized(new { error = "API key inválida" });
+
+            // Validar arquivo
+            if (file == null || file.Length == 0)
+                return BadRequest(new { error = "Nenhum arquivo enviado" });
+
+            // Validar tamanho (ex: máximo 100MB)
+            if (file.Length > 100 * 1024 * 1024)
+                return BadRequest(new { error = "Arquivo muito grande (máx. 100MB)" });
+
+            // Criar diretório do grupo se não existir
+            var uploadPath = Path.Combine("Uploads", group);
+            Directory.CreateDirectory(uploadPath);
+
+            // Gerar nome único para o arquivo
+            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+            var filePath = Path.Combine(uploadPath, fileName);
+
+            // Salvar arquivo
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            // Retornar resposta de sucesso
+            return Ok(new 
+            { 
+                success = true,
+                message = "Arquivo salvo com sucesso",
+                data = new
+                {
+                    id = Guid.NewGuid().ToString(),
+                    originalName = file.FileName,
+                    savedName = fileName,
+                    group = group,
+                    size = file.Length,
+                    path = filePath,
+                    downloadUrl = $"/api/download/{group}/{fileName}",
+                    uploadedAt = DateTime.UtcNow
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new 
+            { 
+                success = false,
+                error = ex.Message 
+            });
+        }
+    }
+
+    private bool IsValidApiKey(string apiKey)
+    {
+        // Implementar lógica de validação da chave
+        // Exemplo: verificar no banco de dados ou config
+        return apiKey == "f9093a0557c7a280e278916a27f04f37";
+    }
+}</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Highlight.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <!-- C# syntax highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/csharp.min.js"></script>
+
+    <script>
+        // Inicializar highlight.js
+        hljs.highlightAll();
+
+        // Atualizar preview do arquivo
+        function updateFilePreview() {
+            const fileInput = document.getElementById('fileInput');
+            const filePreview = document.getElementById('filePreview');
+            const fileName = document.getElementById('fileName');
+            const fileSize = document.getElementById('fileSize');
+
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                fileName.textContent = file.name;
+                fileSize.textContent = formatFileSize(file.size);
+                filePreview.classList.remove('d-none');
+            }
+        }
+
+        // Limpar seleção de arquivo
+        function clearFile() {
+            document.getElementById('fileInput').value = '';
+            document.getElementById('filePreview').classList.add('d-none');
+        }
+
+        // Formatar tamanho do arquivo
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Drag and drop
+        const dropArea = document.getElementById('dropArea');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+            dropArea.style.borderColor = '#0d6efd';
+            dropArea.style.background = '#f0f7ff';
+        }
+
+        function unhighlight() {
+            dropArea.style.borderColor = '#dee2e6';
+            dropArea.style.background = '#fafafa';
+        }
+
+        dropArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+
+            if (files.length > 0) {
+                document.getElementById('fileInput').files = files;
+                updateFilePreview();
+            }
+        }
+
+        // Copiar código C# principal
+        function copyCode() {
+            const code = document.getElementById('codeExample').textContent;
+            copyToClipboard(code, 'btn-copy');
+        }
+
+        // Copiar código do Controller
+        function copyControllerCode() {
+            const code = document.getElementById('controllerCode').textContent;
+            copyToClipboard(code, 'btn-copy:nth-of-type(2)');
+        }
+
+        // Função genérica para copiar
+        function copyToClipboard(text, buttonSelector) {
+            navigator.clipboard.writeText(text).then(() => {
+                const button = document.querySelector(buttonSelector);
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="bi bi-check2 me-1"></i>Copiado!';
+                button.classList.add('copied');
+
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        // Form submission
+        document.getElementById('uploadForm').addEventListener('submit', function (e) {
+            const fileInput = document.getElementById('fileInput');
+
+            if (!fileInput.files[0]) {
+                e.preventDefault();
+                alert('Por favor, selecione um arquivo para upload.');
+                return;
+            }
+
+            // Opcional: mostrar loading
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Enviando...';
+            submitBtn.disabled = true;
+
+            setTimeout(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
+

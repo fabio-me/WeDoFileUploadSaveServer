@@ -4,11 +4,11 @@
     {
         public long Id { get; set; }
         public bool IsDeleted { get; set; }
-        public string? Key { get; set; } // KeyFile
+        public string? ProjectName { get; set; }
         public string? Group { get; set; }
         public string? Name { get; set; }
         public long Size { get; set; }
-        public string? Extension { get; set; }
+        public string? ContentType { get; set; }
         public byte[]? Data { get; set; }
     }
 }

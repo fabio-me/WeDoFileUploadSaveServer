@@ -24,8 +24,6 @@ namespace WeDoFileUploadSaveServer.Repositories.Contexts
         public DbSet<FileDb> FileDb { get; set; }
 
 
-        //test
-        public DbSet<Arquivo> Arquivo { get; set; }
 
 
     }
