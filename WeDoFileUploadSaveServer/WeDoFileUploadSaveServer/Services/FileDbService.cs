@@ -13,11 +13,13 @@ namespace WeDoFileUploadSaveServer.Services
 {
     public class FileDbService : IFileDbService
     {
-        public readonly DbContextMariaDB _context;
+        private readonly DbContextMariaDB _context;
+        private readonly IConfiguration _configuration;
 
-        public FileDbService(DbContextMariaDB context)
+        public FileDbService(DbContextMariaDB context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         private string clearGuid(string guid)
@@ -42,25 +44,32 @@ namespace WeDoFileUploadSaveServer.Services
             return clearGuid(guidLong);
         }
 
-        private long GetSizeLimit()
+        private int GetSizeLimit()
         {
-            long numberInMB = 10;
-            return numberInMB * 1024 * 1024;
+            int maxFileSizeInMb = 1;
+
+            var confMaxFileSizeInMb = _configuration["max-file-size-in-mb"];
+            if (confMaxFileSizeInMb != null && int.TryParse(confMaxFileSizeInMb, out var parsedSize))
+            {
+                maxFileSizeInMb = parsedSize;
+            }
+
+            return maxFileSizeInMb * 1024 * 1024;
         }
 
-        public async Task<FileDbSaveConfirmeDTO> Create(IFormFile file, string projectName, string group)
+        public async Task<FileDbSaveResultDTO> Create(IFormFile file, string projectName, string group)
         {
             if (file == null || file.Length == 0)
-                return new FileDbSaveConfirmeDTO().Fail("INVALID_FILE");
+                return new FileDbSaveResultDTO().Fail("INVALID_FILE");
 
             if (file.Length > GetSizeLimit())
-                return new FileDbSaveConfirmeDTO().Fail("FILE_LARGER_THAN_ALLOWED");
+                return new FileDbSaveResultDTO().Fail("FILE_LARGER_THAN_ALLOWED");
 
             if (string.IsNullOrEmpty(projectName))
-                return new FileDbSaveConfirmeDTO().Fail("INVALID_PROJECT_NAME");
+                return new FileDbSaveResultDTO().Fail("INVALID_PROJECT_NAME");
 
             if (string.IsNullOrEmpty(group))
-                return new FileDbSaveConfirmeDTO().Fail("INVALID_GROUP");
+                return new FileDbSaveResultDTO().Fail("INVALID_GROUP");
 
             using var memoryStream = new MemoryStream();
             await file.CopyToAsync(memoryStream);
@@ -80,28 +89,48 @@ namespace WeDoFileUploadSaveServer.Services
 
             if (rowsAffected > 0)
             {
-                string pathName = $"/{fileDb.Name}";
-                return new FileDbSaveConfirmeDTO().Ok(pathName);
+                return new FileDbSaveResultDTO().Ok(fileDb.Name);
             }
-            return new FileDbSaveConfirmeDTO();
+            return new FileDbSaveResultDTO();
         }
 
-        public async Task<FileDbView> View(string fileName)
+        public async Task<FileDbViewDTO> View(string fileName)
         {
             if (string.IsNullOrWhiteSpace(fileName))
-                return new FileDbView().Fail("INVALID_FILE_NAME");
+                return new FileDbViewDTO().Fail("INVALID_FILE_NAME");
 
             FileDb? fileDb = await _context.FileDb
                 .FirstOrDefaultAsync(f => f.Name == fileName && f.IsDeleted == false);
 
             if (fileDb == null)
-                return new FileDbView().Fail("NOT_FOUND");
+                return new FileDbViewDTO().Fail("NOT_FOUND");
 
             if (fileDb.ContentType == null ||
                 fileDb.Data == null)
-                return new FileDbView().Fail("FILE_ERROR");
+                return new FileDbViewDTO().Fail("FILE_ERROR");
 
-            return new FileDbView().Ok(fileDb.ContentType, fileDb.Data);
+            return new FileDbViewDTO().Ok(fileDb.ContentType, fileDb.Data);
+        }
+
+        public async Task<FileDbDeleteResultDTO> Delete(string fileName)
+        {
+            if (string.IsNullOrWhiteSpace(fileName))
+               return new FileDbDeleteResultDTO().Fail("INVALID_FILE_NAME");
+
+            FileDb? fileDbForDelete = await _context.FileDb
+                .FirstOrDefaultAsync(f => f.Name == fileName && f.IsDeleted == false);
+            if (fileDbForDelete == null)
+                return new FileDbDeleteResultDTO().Fail("NOT_FOUND");
+
+            fileDbForDelete.IsDeleted = true;
+            _context.FileDb.Update(fileDbForDelete);
+            int rowsAffected = await _context.SaveChangesAsync();
+
+            if (rowsAffected > 0)
+            {
+                return new FileDbDeleteResultDTO().Ok();
+            }
+            return new FileDbDeleteResultDTO().Fail("ERROR_DATABASE");
         }
     }
 }

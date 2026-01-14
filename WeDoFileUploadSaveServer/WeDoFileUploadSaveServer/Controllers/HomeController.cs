@@ -44,7 +44,7 @@ namespace WeDoFileUploadSaveServer.Controllers
 
             //string key = "f9093a0557c7a280e278916a27f04f37";
             //string group = "test";
-            FileDbSaveConfirmeDTO fileDbSaveConfirme = await _fileDbService.Create(file, key, group);
+            FileDbSaveResultDTO fileDbSaveConfirme = await _fileDbService.Create(file, key, group);
 
             return Json(fileDbSaveConfirme);
         }

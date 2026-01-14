@@ -1,15 +1,15 @@
 ﻿namespace WeDoFileUploadSaveServer.DTOs
 {
-    public class FileDbView
+    public class FileDbViewDTO
     {
         public bool Success { get; set; }
         public string? Message { get; set; }
         public string? ContentType { get; set; }
         public byte[]? Data { get; set; }
 
-        public FileDbView Ok(string contentType, byte[] data)
+        public FileDbViewDTO Ok(string contentType, byte[] data)
         {
-            return new FileDbView
+            return new FileDbViewDTO
             {
                 Success = true,
                 ContentType = contentType,
@@ -18,9 +18,9 @@
             };
         }
 
-        public FileDbView Fail(string message)
+        public FileDbViewDTO Fail(string message)
         {
-            return new FileDbView
+            return new FileDbViewDTO
             {
                 Success = false,
                 Message = message

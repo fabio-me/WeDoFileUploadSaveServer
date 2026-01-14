@@ -2,25 +2,25 @@
 
 namespace WeDoFileUploadSaveServer.DTOs
 {
-    public class FileDbSaveConfirmeDTO
+    public class FileDbSaveResultDTO
     {
         public bool Success { get; set; }
         public string? Message { get; set; }
-        public string? PathName { get; set; }
+        public string? File_name { get; set; }
 
-        public FileDbSaveConfirmeDTO Ok(string pathName)
+        public FileDbSaveResultDTO Ok(string fileName)
         {
-            return new FileDbSaveConfirmeDTO
+            return new FileDbSaveResultDTO
             {
                 Success = true,
-                PathName = pathName,
+                File_name = fileName,
                 Message = "OPERATION_COMPLETED_SUCCESSFULLY"
             };
         }
 
-        public FileDbSaveConfirmeDTO Fail(string message)
+        public FileDbSaveResultDTO Fail(string message)
         {
-            return new FileDbSaveConfirmeDTO
+            return new FileDbSaveResultDTO
             {
                 Success = false,
                 Message = message,

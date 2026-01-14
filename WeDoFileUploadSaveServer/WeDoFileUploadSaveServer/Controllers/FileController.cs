@@ -9,10 +9,12 @@ namespace WeDoFileUploadSaveServer.Controllers
     public class FileController : Controller
     {
         public readonly IFileDbService _fileDbService;
+        public readonly IConfiguration _configuration;
 
-        public FileController(IFileDbService fileDbService)
+        public FileController(IFileDbService fileDbService, IConfiguration configuration)
         {
             _fileDbService = fileDbService;
+            _configuration = configuration;
         }
 
         public IActionResult Index()
@@ -25,56 +27,60 @@ namespace WeDoFileUploadSaveServer.Controllers
             IFormFile file,
             string project_name,
             string group,
-            string key_server)
+            string api_key_server)
         {
             //return Ok("abc");
+
+            // adicionar white liste com os ips aultorizados
 
             if (file == null || file.Length == 0)
                 return BadRequest("Arquivo inválido");
 
             // HTTP ERROR 401
-            if (key_server != "key_7194f9c8-61c2-4ba6-8c47-aec4cd70ed53")
+            if (api_key_server != _configuration["api-key-server"])
                 return Unauthorized();
 
             //string key = "f9093a0557c7a280e278916a27f04f37";
             //string group = "test";
-            FileDbSaveConfirmeDTO fileDbSaveConfirme = await _fileDbService.Create(file, project_name, group);
+            FileDbSaveResultDTO fileDbSaveResultDTO = await _fileDbService.Create(file, project_name, group);
 
-            if (!fileDbSaveConfirme.Success)
-                return BadRequest(fileDbSaveConfirme.Message);
+            if (!fileDbSaveResultDTO.Success)
+                return BadRequest(fileDbSaveResultDTO.Message);
 
-            return Json(fileDbSaveConfirme);
+            return Json(fileDbSaveResultDTO);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Get(string fileName)
-        {
-            // implemte pedido de key do arquivo
-            FileDbView fileDbView = await _fileDbService.View(fileName);
-            //return File(fileDbView.Data, fileDbView.Extension);
-            return Ok();
-        }
-
-        public async Task<IActionResult> View(string id)
+        public async Task<IActionResult> Get(string id) //media
         {
             string fileName = id;
 
             // implemte pedido de key do arquivo
-            FileDbView fileDbView = await _fileDbService.View(fileName);
-
-            // url esemplo usar nome do projeto
-            // https://d1.awsstatic.com/onedam/marketing-channels/website/aws/en_US
+            FileDbViewDTO fileDbViewDTO = await _fileDbService.View(fileName);
 
             // criar metodo de validar nome para não sobre carregara o server
 
             // cruzar e jogar uma key no front pra autenticar no broswe a visualizar o arquivo
 
-            if (!fileDbView.Success)
-                return BadRequest(fileDbView.Message);
+            if (!fileDbViewDTO.Success ||
+                fileDbViewDTO.Data == null ||
+                fileDbViewDTO.ContentType == null)
+                return BadRequest(fileDbViewDTO.Message);
 
-            //Response.Headers.Add("Content-Disposition", "inline");
             Response.Headers["Content-Disposition"] = "inline";
-            return File(fileDbView.Data, fileDbView.ContentType);
+            return File(fileDbViewDTO.Data, fileDbViewDTO.ContentType);
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> Delete(
+            string file_name,
+            [FromHeader] string api_key_server)
+        {
+            if (api_key_server != _configuration["api-key-server"])
+                return Unauthorized();
+
+            FileDbDeleteResultDTO fileDbDeleteResultDTO = await _fileDbService.Delete(file_name);
+
+            return Json(fileDbDeleteResultDTO);
         }
     }
 }

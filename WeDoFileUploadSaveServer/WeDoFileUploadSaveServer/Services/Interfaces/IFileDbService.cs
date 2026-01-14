@@ -4,7 +4,8 @@ namespace WeDoFileUploadSaveServer.Services.Interfaces
 {
     public interface IFileDbService
     {
-        Task<FileDbSaveConfirmeDTO> Create(IFormFile file, string key, string group);
-        Task<FileDbView> View(string fileName);
+        Task<FileDbSaveResultDTO> Create(IFormFile file, string key, string group);
+        Task<FileDbViewDTO> View(string fileName);
+        Task<FileDbDeleteResultDTO> Delete(string fileName);
     }
 }
