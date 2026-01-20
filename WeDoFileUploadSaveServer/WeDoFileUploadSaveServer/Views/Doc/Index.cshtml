@@ -245,12 +245,33 @@
                     </ul>
 
                     <h6>Exemplo cURL:</h6>
-                    <pre class="bg-light p-2 rounded"><code>curl -X POST \
-  -F "api_key_server=key_7194f9c8-61c2-4ba6-8c47-aec4cd70ed53" \
-  -F "project_name=QA_WeDoFile" \
-  -F "group=development" \
-  -F "file=@@/caminho/arquivo.pdf" \
-  https://api.seuservidor.com/upload</code></pre>
+                    <pre class="bg-light p-2 rounded">
+                        <code>
+using var content = new MultipartFormDataContent();
+
+content.Add(new StreamContent(file.OpenReadStream()),
+            "file",
+            file.FileName);
+
+content.Add(new StringContent(project_name), "project_name");
+content.Add(new StringContent(group), "group");
+content.Add(new StringContent(apiKey), "api_key_server");
+
+await client.PostAsync("https://servidor-final/File/Upload", content);
+                        </code>
+                    </pre>
+
+                   <h6>Resposta de Sucesso - JSON:</h6>
+                    <pre class="bg-light p-2 rounded">
+                        <code>
+{
+    "success": true,
+    "message": "OPERATION_COMPLETED_SUCCESSFULLY",
+    "file_name": "8b860d6a9eab4db48d8993814bde8d91d457e95d25954483a8c5cc96dd16da79"
+}
+                        </code>
+                    </pre>
+
                 </div>
             </div>
         </div>
@@ -283,6 +304,16 @@
 curl --location '<spam class="url-server-doc"></spam>File/Get/686d96a7bfc34532844f2d79fc263bd12bd7bcf1617548888d7614f9bf1b7499'
                         </code>
                     </pre>
+
+                    <h6>Resposta de Sucesso:</h6>
+                    <pre class="bg-light p-2 rounded">
+                        <code>
+HTTP/1.1 200 OK
+→ binário puro:
+ÿØÿÛC
+                        </code>
+                    </pre>
+
                 </div>
             </div>
         </div>
@@ -453,166 +484,8 @@ Console.WriteLine(await response.Content.ReadAsStringAsync());
                     </div>
                 </form>
 
-                <!-- Code Example Section -->
-                <div class="code-section">
-                    <div class="code-header">
-                        <div class="code-title">
-                            <i class="bi bi-code-slash me-2"></i>Exemplo de Implementação em C#
-                        </div>
-                        <button class="btn-copy" onclick="copyCode()">
-                            <i class="bi bi-clipboard me-1"></i>Copiar Código
-                        </button>
-                    </div>
+    
 
-                    <pre><code class="language-csharp" id="codeExample">using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Web;
-using System.Web.Mvc;
-
-public class UploadClientController : Controller
-{
-    [HttpPost]
-    public async Task<ActionResult> Enviar(HttpPostedFileBase file)
-    {
-        if (file == null || file.ContentLength == 0)
-        {
-            TempData["Erro"] = "Arquivo inválido";
-            return RedirectToAction("Index");
-        }
-
-        using (var client = new HttpClient())
-        {
-            // URL da API que contém o método Upload
-            var url = "https://localhost:5001/upload";
-
-            using (var form = new MultipartFormDataContent())
-            {
-                // Arquivo
-                var streamContent = new StreamContent(file.InputStream);
-                streamContent.Headers.ContentType =
-                    new MediaTypeHeaderValue(file.ContentType);
-
-                form.Add(streamContent, "file", file.FileName);
-
-                // Parâmetros esperados pela API
-                form.Add(new StringContent("f9093a0557c7a280e278916a27f04f37"), "key");
-                form.Add(new StringContent("test"), "group");
-                form.Add(new StringContent("key_7194f9c8-61c2-4ba6-8c47-aec4cd70ed53"), "key_server");
-
-                var response = await client.PostAsync(url, form);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    TempData["Erro"] = "Erro ao enviar arquivo: " + response.StatusCode;
-                    return RedirectToAction("Index");
-                }
-
-                var result = await response.Content.ReadAsStringAsync();
-                TempData["Sucesso"] = "Arquivo enviado com sucesso";
-
-                return RedirectToAction("Index");
-            }
-        }
-    }
-
-    [HttpGet]
-    public ActionResult Index()
-    {
-        return View();
-    }
-}
-</code></pre>
-                </div>
-
-                <!-- Additional C# Examples -->
-                <div class="code-section mt-3">
-                    <div class="code-header">
-                        <div class="code-title">
-                            <i class="bi bi-code-slash me-2"></i>Controller ASP.NET Core
-                        </div>
-                        <button class="btn-copy" onclick="copyControllerCode()">
-                            <i class="bi bi-clipboard me-1"></i>Copiar Código
-                        </button>
-                    </div>
-
-                    <pre><code class="language-csharp" id="controllerCode">using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
-
-[ApiController]
-[Route("api/[controller]")]
-public class UploadController : ControllerBase
-{
-    [HttpPost]
-    [DisableRequestSizeLimit] // Remove limite de tamanho
-    public async Task&lt;IActionResult&gt; UploadFile(
-        [FromForm] string key,
-        [FromForm] string group,
-        [FromForm] IFormFile file)
-    {
-        try
-        {
-            // Validar chave da API
-            if (!IsValidApiKey(key))
-                return Unauthorized(new { error = "API key inválida" });
-
-            // Validar arquivo
-            if (file == null || file.Length == 0)
-                return BadRequest(new { error = "Nenhum arquivo enviado" });
-
-            // Validar tamanho (ex: máximo 100MB)
-            if (file.Length > 100 * 1024 * 1024)
-                return BadRequest(new { error = "Arquivo muito grande (máx. 100MB)" });
-
-            // Criar diretório do grupo se não existir
-            var uploadPath = Path.Combine("Uploads", group);
-            Directory.CreateDirectory(uploadPath);
-
-            // Gerar nome único para o arquivo
-            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
-            var filePath = Path.Combine(uploadPath, fileName);
-
-            // Salvar arquivo
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await file.CopyToAsync(stream);
-            }
-
-            // Retornar resposta de sucesso
-            return Ok(new 
-            { 
-                success = true,
-                message = "Arquivo salvo com sucesso",
-                data = new
-                {
-                    id = Guid.NewGuid().ToString(),
-                    originalName = file.FileName,
-                    savedName = fileName,
-                    group = group,
-                    size = file.Length,
-                    path = filePath,
-                    downloadUrl = $"/api/download/{group}/{fileName}",
-                    uploadedAt = DateTime.UtcNow
-                }
-            });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new 
-            { 
-                success = false,
-                error = ex.Message 
-            });
-        }
-    }
-
-    private bool IsValidApiKey(string apiKey)
-    {
-        // Implementar lógica de validação da chave
-        // Exemplo: verificar no banco de dados ou config
-        return apiKey == "f9093a0557c7a280e278916a27f04f37";
-    }
-}</code></pre>
-                </div>
             </div>
         </div>
     </div>
