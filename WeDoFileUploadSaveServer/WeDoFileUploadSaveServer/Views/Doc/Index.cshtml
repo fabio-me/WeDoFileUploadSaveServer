@@ -230,7 +230,7 @@
                 <div class="card-body">
                     <div class="mb-3">
                         <span class="badge bg-warning">POST</span>
-                        <code class="ms-2"><spam class="url-server-doc"></spam>File/Upload</code>
+                        <code class="ms-2"><spam class="url-server-doc"></spam>/File/Upload</code>
                     </div>
                     
                     <h6>Descrição:</h6>
@@ -247,17 +247,54 @@
                     <h6>Exemplo cURL:</h6>
                     <pre class="bg-light p-2 rounded">
                         <code>
-using var content = new MultipartFormDataContent();
+using Newtonsoft.Json;
+using System.Net.Http.Headers;
 
-content.Add(new StreamContent(file.OpenReadStream()),
-            "file",
-            file.FileName);
+private class WeDoFileUploadSaveServerResponse
+{
+    public bool Success { get; set; }
+    public string? Message { get; set; }
+    public string? File_name { get; set; }
+};
 
-content.Add(new StringContent(project_name), "project_name");
-content.Add(new StringContent(group), "group");
-content.Add(new StringContent(apiKey), "api_key_server");
+[HttpPost]
+private async Task<WeDoFileUploadSaveServerResponse> SaveFromWeDoFileUploadSaveServer(IFormFile file)
+{
+    try
+    {
+        const string URL_SERVER = "<spam class="url-server-doc"></spam>";
+        const string API_KEY_SERVER = "key_7194f9c8-61c2-4ba6-8c47-aec4cd70ed53";
+        const string PROJECT_NAME = "QA_WeDoFile";
+        const string GROUP = "development";
 
-await client.PostAsync("https://servidor-final/File/Upload", content);
+        using var client = new HttpClient();
+        using var content = new MultipartFormDataContent();
+        using var fileStream = file.OpenReadStream();
+        var fileContent = new StreamContent(fileStream);
+        fileContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
+
+        content.Add(fileContent, "file", file.FileName);
+
+        var response = await client.PostAsync(
+            $"{URL_SERVER}/File/Upload?project_name={PROJECT_NAME}&group={GROUP}&api_key_server={API_KEY_SERVER}",
+            content
+        );
+
+        response.EnsureSuccessStatusCode();
+        var responseBody = await response.Content.ReadAsStringAsync();
+        return JsonConvert.DeserializeObject<WeDoFileUploadSaveServerResponse>(responseBody)
+            ?? new WeDoFileUploadSaveServerResponse();
+    }
+    catch (Exception ex)
+    {
+        var exception = new WeDoFileUploadSaveServerResponse();
+        exception.Message = ex.Message;
+        return exception;
+    }
+}
+
+WeDoFileUploadSaveServerResponse weDoFileUploadSaveServerResponse = await SaveFromWeDoFileUploadSaveServer(enderecoViewModel.comprovanteDeEndereco);
+
                         </code>
                     </pre>
 
@@ -287,7 +324,7 @@ await client.PostAsync("https://servidor-final/File/Upload", content);
                 <div class="card-body">
                     <div class="mb-3">
                                         <span class="badge bg-success">GET</span>
-                        <code class="ms-2"><spam class="url-server-doc"></spam>File/Get/{file_name}</code>
+                        <code class="ms-2"><spam class="url-server-doc"></spam>/File/Get/{file_name}</code>
                     </div>
                     
                     <h6>Descrição:</h6>
@@ -301,7 +338,7 @@ await client.PostAsync("https://servidor-final/File/Upload", content);
                     <h6>Exemplo cURL:</h6>
                     <pre class="bg-light p-2 rounded">
                         <code>
-curl --location '<spam class="url-server-doc"></spam>File/Get/686d96a7bfc34532844f2d79fc263bd12bd7bcf1617548888d7614f9bf1b7499'
+curl --location '<spam class="url-server-doc"></spam>/File/Get/686d96a7bfc34532844f2d79fc263bd12bd7bcf1617548888d7614f9bf1b7499'
                         </code>
                     </pre>
 
@@ -329,7 +366,7 @@ HTTP/1.1 200 OK
                 <div class="card-body">
                     <div class="mb-3">
                         <span class="badge bg-danger">DELETE</span>
-                        <code class="ms-2"><spam class="url-server-doc"></spam>File/Delete/{file_name}</code>
+                        <code class="ms-2"><spam class="url-server-doc"></spam>/File/Delete/{file_name}</code>
                     </div>
 
                     <h6>Descrição:</h6>
@@ -345,7 +382,7 @@ HTTP/1.1 200 OK
                     <pre class="bg-light p-2 rounded">
                         <code>
 var client = new HttpClient();
-var request = new HttpRequestMessage(HttpMethod.Delete, "<spam class="url-server-doc"></spam>File/Delete?file_name=557fabc8617248df9a77b7b4bdb57cff4fc101c2f47a44c7b6e88aa1d44b3174");
+var request = new HttpRequestMessage(HttpMethod.Delete, "<spam class="url-server-doc"></spam>/File/Delete?file_name=557fabc8617248df9a77b7b4bdb57cff4fc101c2f47a44c7b6e88aa1d44b3174");
 request.Headers.Add("api_key_server", "key_7194f9c8-61c2-4ba6-8c47-aec4cd70ed53");
 var response = await client.SendAsync(request);
 response.EnsureSuccessStatusCode();
@@ -626,7 +663,7 @@ Console.WriteLine(await response.Content.ReadAsStringAsync());
 
     <!-- Visualização -->
     <script>
-        let urlServerDoc = window.location.href.split("Doc")[0];
+            let urlServerDoc = window.location.origin;
 
             document.querySelectorAll(".url-server-doc")
             .forEach(
